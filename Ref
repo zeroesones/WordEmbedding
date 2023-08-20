@@ -1,4 +1,22 @@
 
+def flatten_list(lst):
+    flattened = []
+    for item in lst:
+        if isinstance(item, list):
+            flattened.extend(flatten_list(item))
+        else:
+            flattened.append(item)
+    return flattened
+
+# Define a function to split the text based on delimiters
+def split_text(row):
+    text = row['Text']
+    if isinstance(text, list):
+        text = ' '.join(flatten_list(text))  # Flatten nested lists and convert to a single string
+
+
+
+
 import pandas as pd
 
 # Define the delimiters
