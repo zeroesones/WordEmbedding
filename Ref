@@ -1,3 +1,55 @@
+# Define a function to split the text based on delimiters
+def split_text(row):
+    text = row['Text']
+    if isinstance(text, list):
+        text = ' '.join(flatten_list(text))  # Flatten nested lists and convert to a single string
+
+    delimiter_positions = {delimiter: -1 for delimiter in delimiters}
+    split_texts = {delimiter: '' for delimiter in delimiters}
+
+    for delimiter in delimiters:
+        delimiter_position = text.rfind(delimiter)
+        if delimiter_position >= 0:
+            delimiter_positions[delimiter] = delimiter_position
+
+    # Set up Month_Text
+    if delimiter_positions['MONTH'] >= 0:
+        split_texts['Month_Text'] = text[:delimiter_positions['MONTH']].strip()
+    else:
+        split_texts['Month_Text'] = ''
+
+    # Set up Quarter_Text
+    if delimiter_positions['QUARTER'] >= 0:
+        if delimiter_positions['MONTH'] >= 0:
+            split_texts['Quarter_Text'] = text[delimiter_positions['MONTH'] + len('MONTH'):delimiter_positions['QUARTER']].strip()
+        else:
+            split_texts['Quarter_Text'] = text[:delimiter_positions['QUARTER']].strip()
+    else:
+        split_texts['Quarter_Text'] = ''
+
+    # Set up Year_Text
+    if delimiter_positions['YEAR'] >= 0:
+        if delimiter_positions['QUARTER'] >= 0:
+            split_texts['Year_Text'] = text[delimiter_positions['QUARTER'] + len('QUARTER'):delimiter_positions['YEAR']].strip()
+        elif delimiter_positions['MONTH'] >= 0:
+            split_texts['Year_Text'] = text[delimiter_positions['MONTH'] + len('MONTH'):delimiter_positions['YEAR']].strip()
+        else:
+            split_texts['Year_Text'] = text[:delimiter_positions['YEAR']].strip()
+    else:
+        split_texts['Year_Text'] = ''
+
+    return pd.Series({
+        'RefId': row['RefId'],
+        'RefRefId': row['RefRefId'],
+        'Text': text,
+        'Month_Text': split_texts['Month_Text'],
+        'Quarter_Text': split_texts['Quarter_Text'],
+        'Year_Text': split_texts['Year_Text']
+    })
+
+
+
+
 
 def flatten_list(lst):
     flattened = []
