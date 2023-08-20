@@ -1,2 +1,48 @@
 pattern = r'\b(?:' + '|'.join(Month + Quarter) + r')\b'
     return re.sub(pattern, replace, text, flags=re.IGNORECASE) if text else text
+
+import pandas as pd
+import re
+
+# Sample dataframe
+data = {'RefID': [1, 2, 3],
+        'Text':[[["thirty days period 15% 30 days period 35% thirty day 58% three month"]],
+                [[ "NAV is 10% immediately preceding three months period 15% three month period 35% 3 month"]],
+                 ['']]}
+df = pd.DataFrame(data)
+
+# Lists of patterns
+Month = ['30 days', 'thirty day']
+Quarter = ['three month', '3 month']
+
+# Define the append_text function to handle the replacement
+def append_text(text_list):
+    def replace(match):
+        if match.group() in Month:
+            return match.group() + ' MONTH'
+        elif match.group() in Quarter:
+            return match.group() + ' QUARTER'
+
+    if isinstance(text_list, list):
+        updated_text_list = []
+        for text in text_list:
+            if isinstance(text, list):
+                updated_text = []
+                for sub_list in text:
+                    if isinstance(sub_list, str):
+                        pattern = r'\b(?:' + '|'.join(map(re.escape, Month + Quarter)) + r')\b'
+                        updated_text.append(re.sub(pattern, replace, sub_list, flags=re.IGNORECASE))
+                    else:
+                        updated_text.append(sub_list)
+                updated_text_list.append(updated_text)
+            else:
+                updated_text_list.append(text)
+        return updated_text_list
+    else:
+        return text_list
+
+# Apply the function to each row in the 'Text' column
+df['Text'] = df['Text'].apply(append_text)
+
+print(df)
+
