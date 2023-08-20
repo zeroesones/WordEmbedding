@@ -1,3 +1,99 @@
+
+import pandas as pd
+
+# Define the delimiters
+delimiters = ['MONTH', 'QUARTER', 'YEAR']
+
+# Define a function to split the text based on delimiters
+def split_text(row):
+    text = row['Text']
+    delimiter_positions = {delimiter: -1 for delimiter in delimiters}
+    split_texts = {delimiter: '' for delimiter in delimiters}
+
+    for delimiter in delimiters:
+        delimiter_position = text.rfind(delimiter)
+        if delimiter_position >= 0:
+            delimiter_positions[delimiter] = delimiter_position
+
+    # Set up Month_Text
+    if delimiter_positions['MONTH'] >= 0:
+        split_texts['Month_Text'] = text[:delimiter_positions['MONTH']].strip()
+    else:
+        split_texts['Month_Text'] = text
+
+    # Set up Quarter_Text
+    if delimiter_positions['QUARTER'] >= 0:
+        if delimiter_positions['MONTH'] >= 0:
+            split_texts['Quarter_Text'] = text[delimiter_positions['MONTH']:delimiter_positions['QUARTER']].strip()
+        else:
+            split_texts['Quarter_Text'] = text[:delimiter_positions['QUARTER']].strip()
+    else:
+        split_texts['Quarter_Text'] = ''
+
+    # Set up Year_Text
+    if delimiter_positions['YEAR'] >= 0:
+        if delimiter_positions['QUARTER'] >= 0:
+            split_texts['Year_Text'] = text[delimiter_positions['QUARTER']:delimiter_positions['YEAR']].strip()
+        else:
+            split_texts['Year_Text'] = text[:delimiter_positions['YEAR']].strip()
+    else:
+        split_texts['Year_Text'] = ''
+
+    return pd.Series({
+        'RefId': row['RefId'],
+        'RefRefId': row['RefRefId'],
+        'Text': text,
+        'Month_Text': split_texts['Month_Text'],
+        'Quarter_Text': split_texts['Quarter_Text'],
+        'Year_Text': split_texts['Year_Text']
+    })
+
+# Sample dataframe
+data = {'RefId': [1, 2, 3],
+        'RefRefId': [101, 102, 103],
+        'Text': ["thirty days period 15% 30 days period 35% thirty day 58% three month",
+                 "NAV is 10% immediately preceding three months period 15% three month period 35% 3 month",
+                 '']}
+df = pd.DataFrame(data)
+
+# Apply the function to each row and create a new dataframe
+result_df = df.apply(split_text, axis=1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 pattern = r'\b(?:' + '|'.join(Month + Quarter) + r')\b'
     return re.sub(pattern, replace, text, flags=re.IGNORECASE) if text else text
 
