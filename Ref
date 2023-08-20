@@ -1,0 +1,2 @@
+pattern = r'\b(?:' + '|'.join(Month + Quarter) + r')\b'
+    return re.sub(pattern, replace, text, flags=re.IGNORECASE) if text else text
