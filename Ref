@@ -1,3 +1,65 @@
+Certainly, here's the complete code that includes the expanded `currency_map` dictionary:
+
+```python
+import pandas as pd
+import re
+
+# Expanded mapping of different forms of currency to canonical form
+currency_map = {
+    'USD': ['USD', 'US Dollar', r'\$', 'U.S. Dollar'],
+    'EURO': ['EURO', '€', 'Euros', 'EUR'],
+    'JPY': ['JPY', 'Japan Yen', '¥', 'Japanese Yen'],
+    'GBP': ['GBP', 'Pound Sterling', '£', 'British Pound'],
+    'AUD': ['AUD', 'Australian Dollar', 'A$', 'Aussie Dollar'],
+    'CAD': ['CAD', 'Canadian Dollar', 'C$', 'Can$', 'Loonie'],
+    'CHF': ['CHF', 'Swiss Franc', 'Fr.', 'SFr'],
+    'CNY': ['CNY', 'Chinese Yuan', '¥', 'RMB', 'Renminbi'],
+    'INR': ['INR', 'Indian Rupee', '₹'],
+    'NZD': ['NZD', 'New Zealand Dollar', 'NZ$', 'Kiwi Dollar'],
+    'SEK': ['SEK', 'Swedish Krona', 'kr'],
+    'NOK': ['NOK', 'Norwegian Krone', 'kr'],
+    'BRL': ['BRL', 'Brazilian Real', 'R$', 'Real'],
+    'ZAR': ['ZAR', 'South African Rand', 'R'],
+    'RUB': ['RUB', 'Russian Ruble', '₽', 'Rouble'],
+    'MXN': ['MXN', 'Mexican Peso', '$'],
+    'SGD': ['SGD', 'Singapore Dollar', 'S$', 'Sing$'],
+    'HKD': ['HKD', 'Hong Kong Dollar', 'HK$', 'HKD$'],
+    # Add more currencies and their variations here
+}
+
+# Generate regular expression pattern
+pattern_parts = []
+for canonical, variations in currency_map.items():
+    for v in variations:
+        pattern_parts.append(re.escape(v))
+pattern = '|'.join(pattern_parts)
+
+# Function to extract and map currency
+def extract_currency(text):
+    matches = re.findall(pattern, text)
+    extracted = []
+    for match in matches:
+        for canonical, variations in currency_map.items():
+            if match in variations:
+                extracted.append(canonical)
+    return ', '.join(set(extracted)) if extracted else None
+
+# Create a sample DataFrame
+df = pd.DataFrame({'text': ['Base Currency is USD or $',
+                            'you can say that the base currency is Japan Yen or ¥',
+                            'Euro or € is your base currency']})
+
+# Extract and map currency
+df['extracted_currency'] = df['text'].apply(extract_currency)
+
+# Show the DataFrame
+print(df)
+```
+
+This code will search for any of the forms of each currency in each row of the DataFrame and map them to their canonical form. It will then store the canonical form(s) in a new column called `extracted_currency`.
+
+
+
 # Define a function to split the text based on delimiters
 def split_text(row):
     text = row['Text']
