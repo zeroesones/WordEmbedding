@@ -1,3 +1,61 @@
+When dealing with a large DataFrame, the speed of the `extract_currency` function may become a bottleneck. Here are some ways to speed up the function:
+
+1. **Compile the Regular Expression**: Compile the regular expression pattern once and reuse it to save compilation time.
+  
+2. **Use Pandas' `vectorize`**: Leverage vectorized operations in Pandas instead of Python loops.
+
+3. **Multithreading**: Use Python's `concurrent.futures.ThreadPoolExecutor` to apply the function in parallel.
+
+Here's an example incorporating these improvements:
+
+```python
+import pandas as pd
+import re
+from concurrent.futures import ThreadPoolExecutor
+
+# Expanded currency map
+currency_map = {
+    # ... (same as before)
+}
+
+# Generate regular expression pattern and compile it
+pattern_parts = []
+for canonical, variations in currency_map.items():
+    for v in variations:
+        pattern_parts.append(re.escape(v))
+pattern = '|'.join(pattern_parts)
+compiled_pattern = re.compile(pattern, re.IGNORECASE)
+
+# Function to extract and map currency
+def extract_currency(text):
+    matches = compiled_pattern.findall(text)
+    extracted = []
+    for match in matches:
+        for canonical, variations in currency_map.items():
+            if match.upper() in map(str.upper, variations):
+                extracted.append(canonical)
+    return ', '.join(set(extracted)) if extracted else None
+
+# Create a sample DataFrame
+df = pd.DataFrame({'text': ['Base Currency is USD or $', 
+                            'you can say that the base currency is Japan Yen or ¥', 
+                            'Euro or € is your base currency'] * 1000})  # Repeat rows for testing
+
+# Use ThreadPoolExecutor for parallel execution
+with ThreadPoolExecutor() as executor:
+    df['extracted_currency'] = list(executor.map(extract_currency, df['text']))
+
+# Show the DataFrame
+print(df)
+```
+
+This code should be considerably faster, especially for large DataFrames.
+
+
+
+
+
+
 Certainly, here's the complete code that includes the expanded `currency_map` dictionary:
 
 ```python
