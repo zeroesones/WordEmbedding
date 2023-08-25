@@ -1,3 +1,64 @@
+Certainly! Normalizing the text first could speed up the extraction process, as you'd only need to search for the canonical forms. Here's how you could do it:
+
+1. **Normalize the Text**: Replace all variations of each currency with its canonical form.
+
+2. **Update `extract_currency`**: Modify the function to only look for canonical forms.
+
+Here's some example code:
+
+```python
+import pandas as pd
+import re
+
+# Expanded currency map
+currency_map = {
+    # ... (same as before)
+}
+
+# Generate and compile the regular expression pattern for each canonical form and its variations
+pattern_maps = {}
+for canonical, variations in currency_map.items():
+    pattern_parts = [re.escape(v) for v in variations]
+    pattern = '|'.join(pattern_parts)
+    compiled_pattern = re.compile(pattern, re.IGNORECASE)
+    pattern_maps[canonical] = compiled_pattern
+
+# Function to normalize the text by replacing variations with canonical forms
+def normalize_currency(text):
+    for canonical, compiled_pattern in pattern_maps.items():
+        text = compiled_pattern.sub(canonical, text)
+    return text
+
+# Function to extract canonical forms
+def extract_currency(text):
+    extracted = []
+    for canonical in currency_map.keys():
+        if canonical in text:
+            extracted.append(canonical)
+    return ', '.join(set(extracted)) if extracted else None
+
+# Create a sample DataFrame
+df = pd.DataFrame({
+    'text': [
+        'Base Currency is USD or $',
+        'you can say that the base currency is Japan Yen or ¥',
+        'Euro or € is your base currency'
+    ] * 1000  # Repeat rows for testing
+})
+
+# Normalize the text
+df['normalized_text'] = df['text'].apply(normalize_currency)
+
+# Extract canonical forms
+df['extracted_currency'] = df['normalized_text'].apply(extract_currency)
+
+# Show the DataFrame
+print(df)
+```
+
+This should be more efficient because each text row is scanned fewer times, and the second step just looks for substrings (canonical forms), which is faster than regex matching.
+
+
 When dealing with a large DataFrame, the speed of the `extract_currency` function may become a bottleneck. Here are some ways to speed up the function:
 
 1. **Compile the Regular Expression**: Compile the regular expression pattern once and reuse it to save compilation time.
