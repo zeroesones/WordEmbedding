@@ -14,6 +14,56 @@ def extract_clean_date(text):
     # Replace noisy characters
     text = re.sub(r'[^0-9a-zA-Z\s,]', '', text)
     
+    # Correct the 'dated as o' typo
+    text = re.sub(r'dated as o', 'dated as of', text)
+    
+    # Correct the year typo '20! 8' to '2018'
+    text = re.sub(r'20! 8', '2018', text)
+    
+    # Manually extract the cleaned date using regular expressions
+    date_match = re.search(r'dated as of (\d{1,2}(?:st|nd|rd|th)?)? (\w+)? (\d{4})?', text)
+    if date_match:
+        day = date_match.group(1) or '1'
+        month = date_match.group(2) or 'January'
+        year = date_match.group(3) or '1900'
+        
+        date_str = f'{month} {day}, {year}'
+        
+        # Parse extracted date to datetime object
+        try:
+            date_obj = datetime.strptime(date_str, '%B %d, %Y')
+            return date_obj.strftime('%Y-%m-%d')
+        except ValueError:
+            pass
+    
+    return None
+
+# Apply the function to the 'ContractDate' column
+df['CleanedDate'] = df['ContractDate'].apply(extract_clean_date)
+
+# Display the cleaned dates
+print(df)
+
+
+
+
+
+import pandas as pd
+import re
+from datetime import datetime
+
+# Sample data
+data = {'ContractDate': ['Agreement dated as o May 19, 2008',
+                         'Master Agreement dated as of 9th July 2004',
+                         'Agreement A dated as o 10th July 2008 B dated as of 10 October 2022 C dated as o October 312008',
+                         'Amendment dated as of January 24, 20! 8']}
+df = pd.DataFrame(data)
+
+# Function to extract and clean dates
+def extract_clean_date(text):
+    # Replace noisy characters
+    text = re.sub(r'[^0-9a-zA-Z\s,]', '', text)
+    
     # Match different date formats using regular expressions
     date_formats = [
         r'\b(?:Agreement|Master Agreement|Amendment) dated as of (?:\d{1,2}(?:st|nd|rd|th))?\s?(?:January|February|March|April|May|June|July|August|September|October|November|December)?\s?(?:20\d{2}|\d{4})',
