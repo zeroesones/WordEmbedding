@@ -1,3 +1,59 @@
+If you prefer to store multiple values separated by spaces in the same cell rather than as lists, you can adapt the code to concatenate the extracted values into strings. Here's how you can do it:
+
+```python
+import pandas as pd
+import re
+
+# Sample DataFrame
+data = {
+    'Primary Key': [1, 2],
+    'Reference Number': ['Ref1', 'Ref2'],
+    'Actual Text': [
+        "Some text here and 'minimum net asset amount' with subject to party A. Another 'minimum net asset amount' with subject to party B, USD $30,000.",
+        '"minimum net asset amount" with respect to party A and party B, USD $20,000. Also, minimum net asset amount with respect to party B, €25,000.'
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Initialize empty columns with default empty strings
+df['Patterns'] = ''
+df['Parties'] = ''
+df['Additional Parties'] = ''
+df['Currencies'] = ''
+df['Amounts'] = ''
+
+# Regular expression pattern
+pattern = r"(['\"]?)minimum net asset amount(['\"]?) (?:with (?:subject to|respect to) )?party ([A,B])(?: and party ([A,B]))?,? ([\w\$\€\£\¥]{1,4})?\s?([\d,]+)?"
+
+def extract_info(row):
+    matches = re.findall(pattern, row['Actual Text'], re.IGNORECASE)
+    
+    for match in matches:
+        row['Patterns'] += ' '.join(match) + ' '
+        row['Parties'] += match[3] + ' '
+        row['Additional Parties'] += (match[4] + ' ') if match[4] else ''
+        row['Currencies'] += (match[5].strip() + ' ') if match[5].strip() else 'USD '
+        row['Amounts'] += match[6].replace(',', '') + ' ' if match[6] else ''
+
+    return row
+
+# Apply the function to each row
+df = df.apply(extract_info, axis=1)
+
+# Trim the trailing spaces
+for col in ['Patterns', 'Parties', 'Additional Parties', 'Currencies', 'Amounts']:
+    df[col] = df[col].str.rstrip()
+
+print(df)
+```
+
+In this version, the new columns "Patterns", "Parties", "Additional Parties", "Currencies", and "Amounts" contain strings that hold all relevant extracted values for each row in the DataFrame, separated by spaces. After processing, the code also trims any trailing spaces.
+
+
+
+
+
 To accomplish this, you can modify the regular expression pattern and the Python code to tag the amount based on whether it's for party A, party B, or both. You'll need to capture the party (either "A" or "B") mentioned in the phrase and use it to tag the amount accordingly.
 
 Here's the updated code:
