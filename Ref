@@ -1,3 +1,48 @@
+To accomplish this, you can modify the regular expression pattern and the Python code to tag the amount based on whether it's for party A, party B, or both. You'll need to capture the party (either "A" or "B") mentioned in the phrase and use it to tag the amount accordingly.
+
+Here's the updated code:
+
+```python
+import re
+
+def extract_phrases(text):
+    pattern = r"(['\"]?)minimum net asset amount(['\"]?) (?:with (?:subject to|respect to) )?party ([A,B])(?: and party ([A,B]))?,? ([\w\$\€\£\¥]{1,4})?\s?([\d,]+)?"
+    matches = re.findall(pattern, text, re.IGNORECASE)
+
+    for match in matches:
+        full_match = ''.join(match)
+        print("Found:", full_match)
+
+        party = match[3]  # Party A or B
+        additional_party = match[4]  # If there's a second party mentioned
+        currency = match[5].strip() if match[5].strip() else 'USD'  # Default to USD if not specified
+        amount = match[6].replace(',', '')  # Removing commas for easier parsing
+
+        # Determine party tag
+        if additional_party:
+            tag = f"Amount common to party {party} and party {additional_party}"
+        else:
+            tag = f"Amount specific to party {party}"
+
+        print(tag)
+        print(f"Currency: {currency}")
+        print(f"Amount: {amount}")
+
+# Sample data
+sample_text = """
+Page 1: Some text here and 'minimum net asset amount' with subject to party A.
+Page 2: Another text, "minimum net asset amount" with respect to party A and party B, USD$20,000.
+Page 3: Yet another text, minimum net asset amount with respect to party A, $45,000.
+Page 4: In Europe, minimum net asset amount with respect to party B, €25,000.
+"""
+
+extract_phrases(sample_text)
+```
+
+In this updated code, I modified the regular expression to capture the party (either "A" or "B") using `party ([A,B])(?: and party ([A,B]))?,?`. Then, within the Python code, I use these captured values to determine if the amount is specific to party A, party B, or common to both, and tag it accordingly.
+
+
+
 import pandas as pd
 import re
 from datetime import datetime
