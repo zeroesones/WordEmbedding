@@ -1,6 +1,54 @@
+To account for the possibility of a space or no space between the currency symbol and the amount, you can update the regular expression pattern. The "\s?" denotes that there can be zero or one whitespace character. Here's how you can modify the code:
+
+```python
+import pandas as pd
+import re
+
+# Sample DataFrame (you would use your real DataFrame here)
+data = {
+    'MID': [1, 2],
+    'DOCREFID': ['Doc1', 'Doc2'],
+    'AGREEMENT CONTENT': [
+        'MINIMUM TRANSFER AMOUNT means with respect to a party as of any date USD $100,000.',
+        'MINIMUM TRANSFER AMOUNT means with respect to a party as of any date EUR€50,000.'
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Initialize new columns
+df['Extracted_Phrase'] = ''
+
+# Regular expression pattern to match the relevant phrases
+pattern = r"(MINIMUM TRANSFER AMOUNT means with respect to a party as of any date [\w\$€£¥]\s?[\d,]+)"
+
+def extract_phrase(row):
+    match = re.search(pattern, row['AGREEMENT CONTENT'], re.IGNORECASE)
+    if match:
+        row['Extracted_Phrase'] = match.group(0)
+    return row
+
+# Apply the function to each row
+df = df.apply(extract_phrase, axis=1)
+
+print(df)
+```
+
+In this updated pattern, the "\s?" will match either a space or no space between the currency symbol and the amount, catering to both scenarios.
+
+
+
+
+
+
 If you prefer to store multiple values separated by spaces in the same cell rather than as lists, you can adapt the code to concatenate the extracted values into strings. Here's how you can do it:
 
 ```python
+
+
+
+
+
 import pandas as pd
 import re
 
