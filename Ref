@@ -9,6 +9,49 @@ df = pd.DataFrame(data)
 # Function to check if any value in C matches with D
 def check_match(row, col_c, col_d):
     if pd.notna(row[col_c]):
+        c_value = row[col_c]
+        if isinstance(c_value, str):
+            values = c_value.split()
+            for val in values:
+                if pd.notna(val):
+                    try:
+                        float_val = float(val) / 1000
+                        if np.isclose(float_val, row[col_d]):
+                            return True
+                    except ValueError:
+                        pass
+        else:
+            try:
+                float_val = float(c_value) / 1000
+                if np.isclose(float_val, row[col_d]):
+                    return True
+            except ValueError:
+                pass
+    return False
+
+# Columns to compare
+col_c = 'C'
+col_d = 'D'
+
+# Apply the function to each row and create a new column 'Result'
+df['Result'] = df.apply(lambda row: check_match(row, col_c, col_d), axis=1)
+
+print(df)
+
+
+
+
+import pandas as pd
+import numpy as np
+
+# Sample data
+data = {'C': ['0.5 1.2 3.0', '2.5', '1.0', np.nan],
+        'D': [12, 25, 10, 20]}
+df = pd.DataFrame(data)
+
+# Function to check if any value in C matches with D
+def check_match(row, col_c, col_d):
+    if pd.notna(row[col_c]):
         if isinstance(row[col_c], str):
             values = row[col_c].split()
         else:
