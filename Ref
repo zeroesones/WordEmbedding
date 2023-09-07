@@ -1,3 +1,35 @@
+You can use the Python library `pandas` along with regular expressions (`re`) to extract the specified phrases from a DataFrame column that contains text. Here's a simple example code snippet:
+
+```python
+import pandas as pd
+import re
+
+# Sample DataFrame
+df = pd.DataFrame({
+    'text': [
+        'Some text "Valuation Date Location" means, with respect to each party, each city, region or country specified below: Party A: London Party B: Copenhagen Some more text',
+        'Another text "Valuation Date Location" means, with respect to: Bank: New York Party B: London'
+    ]
+})
+
+# Function to extract the matching phrase
+def extract_location(text):
+    regex_pattern = r'"Valuation Date Location" means, with respect to.*?(Party [AB]: [\w\s]+|Bank: [\w\s]+)+'
+    match = re.search(regex_pattern, text)
+    return match.group(0) if match else None
+
+# Apply the function to the DataFrame
+df['extracted_text'] = df['text'].apply(extract_location)
+
+print(df)
+```
+
+The new column `'extracted_text'` will contain the matching phrases you're looking for.
+
+Note: The regular expression I used (`regex_pattern`) is just a sample and might not capture all variations of the text structure you provided. You may need to modify it according to your exact needs.
+
+
+
 To extract city or country names from each sentence, you can use regular expressions along with the `re.findall()` function. The function will return all non-overlapping matches of the pattern in the string as a list. Here's how you can do it:
 
 ```python
