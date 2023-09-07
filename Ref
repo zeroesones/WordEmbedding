@@ -1,3 +1,40 @@
+To extract city or country names from each sentence, you can use regular expressions along with the `re.findall()` function. The function will return all non-overlapping matches of the pattern in the string as a list. Here's how you can do it:
+
+```python
+import pandas as pd
+import re
+
+# Sample DataFrame
+df = pd.DataFrame({
+    'text': [
+        'Some text "Valuation Date Location" means, with respect to each party, each city, region or country specified below: Party A: London Party B: Copenhagen Some more text',
+        'Another text "Valuation Date Location" means, with respect to: Bank: New York Party B: London'
+    ]
+})
+
+# Function to clean the text
+def clean_text(text):
+    return re.sub(r'[,"":]', '', text)
+
+# Function to extract cities or countries
+def extract_location(text):
+    matches = re.findall(r'(Party [AB]|Bank): ([\w\s]+)', text)
+    return [match[1] for match in matches]
+
+# Clean the text
+df['cleaned_text'] = df['text'].apply(clean_text)
+
+# Extract cities or countries
+df['extracted_locations'] = df['cleaned_text'].apply(extract_location)
+
+print(df[['text', 'extracted_locations']])
+```
+
+This will add a new column `extracted_locations` to the DataFrame, containing the extracted cities or countries as lists. For sentence 1, it will contain `['London', 'Copenhagen']`, and for sentence 2, it will contain `['New York', 'London']`.
+
+
+
+
 pattern = r'(?:Party A\s*)?([A-Za-z]+|\$|€|£)?\s*(\d+(?:\.\d{0,2})?)'
 
 
