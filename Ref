@@ -1,3 +1,41 @@
+You can update the regular expression pattern to account for variations like "Bank" or "Counterparty" and "Party B" or "Counterparty". Here's how you can modify the code:
+
+```python
+import pandas as pd
+import re
+
+# Sample DataFrame
+df = pd.DataFrame({
+    'text': [
+        'Some text "Valuation Date Location" means, with respect to each party, each city, region or country specified below: Party A: London Party B: Copenhagen Some more text',
+        'Another text "Valuation Date Location" means, with respect to: Bank: New York Party B: London',
+        'Yet another text "Valuation Date Location" means, with respect to: Counterparty: Tokyo Party B: Sydney'
+    ]
+})
+
+# Function to clean the text
+def clean_text(text):
+    return re.sub(r'[,"":]', '', text)
+
+# Function to extract the complete information about Valuation Date Location
+def extract_full_info(text):
+    regex_pattern = r'"Valuation Date Location" means, with respect to.*?((Party [AB]|Bank|Counterparty): [\w\s]+[\s]*)+'
+    match = re.search(regex_pattern, text)
+    return match.group(0) if match else None
+
+# Clean the text
+df['cleaned_text'] = df['text'].apply(clean_text)
+
+# Extract complete information
+df['extracted_info'] = df['cleaned_text'].apply(extract_full_info)
+
+print(df[['text', 'extracted_info']])
+```
+
+In this modified version, the regular expression now includes "Bank" or "Counterparty" and "Party [AB]" or "Counterparty", allowing it to match any of these options when they appear in the sentence. The `extracted_info` column will then contain the complete information, including these variations.
+
+
+
 You can use the Python library `pandas` along with regular expressions (`re`) to extract the specified phrases from a DataFrame column that contains text. Here's a simple example code snippet:
 
 ```python
