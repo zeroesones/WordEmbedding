@@ -1,3 +1,50 @@
+
+You can use the Pandas library in Python to read multiple sheets from an Excel workbook and then consolidate the information into a single DataFrame (i.e., a single sheet). You can then write this consolidated DataFrame back into a new Excel sheet.
+
+Here's a step-by-step example:
+
+1. Read each sheet into its own DataFrame.
+2. Identify the unique IDs and create a consolidated DataFrame with those IDs.
+3. Populate the attributes from each sheet into the consolidated DataFrame.
+
+```python
+import pandas as pd
+
+# Step 1: Read each sheet into its own DataFrame
+xls = pd.ExcelFile("your_workbook.xlsx")
+sheet1 = pd.read_excel(xls, 'Sheet1')
+sheet2 = pd.read_excel(xls, 'Sheet2')
+# Add as many sheets as you have
+
+# Step 2: Identify unique IDs and create a consolidated DataFrame
+unique_ids = pd.concat([sheet1['ID'], sheet2['ID']]).drop_duplicates().reset_index(drop=True) # Add more sheets as needed
+consolidated_df = pd.DataFrame({'ID': unique_ids})
+
+# Step 3: Populate attributes from each sheet into the consolidated DataFrame
+def populate_attribute(sheet, attribute_column, consolidated_df):
+    attribute_dict = sheet.set_index('ID')[attribute_column].to_dict()
+    consolidated_df[attribute_column] = consolidated_df['ID'].map(attribute_dict)
+
+# Populate 'attribute1' from 'Sheet1'
+populate_attribute(sheet1, 'attribute1', consolidated_df)
+
+# Populate other attributes from other sheets as needed
+# populate_attribute(sheet2, 'attribute2', consolidated_df)
+
+# Write the consolidated DataFrame to a new Excel sheet
+consolidated_df.to_excel("consolidated_sheet.xlsx", index=False)
+```
+
+In this example, replace `your_workbook.xlsx` with the name of your Excel workbook. Also, replace `'Sheet1'`, `'Sheet2'`, etc., with the names of your sheets, and `'attribute1'` with the names of the attribute columns you're interested in.
+
+Remember to install pandas and openpyxl libraries for this to work. You can install them via pip:
+```bash
+pip install pandas openpyxl
+```
+
+This code should give you a new Excel file, `consolidated_sheet.xlsx`, with the consolidated information.
+
+
 You can update the regular expression pattern to account for variations like "Bank" or "Counterparty" and "Party B" or "Counterparty". Here's how you can modify the code:
 
 ```python
