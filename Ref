@@ -1,3 +1,188 @@
+Sub CreateFeatureEngineeringPresentation()
+
+    Dim pptApp As Object
+    Dim pptPresentation As Object
+    Dim pptSlide As Object
+    
+    ' Initialize PowerPoint application
+    Set pptApp = CreateObject("PowerPoint.Application")
+    pptApp.Visible = True
+    
+    ' Add a new Presentation
+    Set pptPresentation = pptApp.Presentations.Add
+    
+    ' Slide 1: Title Slide
+    Set pptSlide = pptPresentation.Slides.Add(1, ppLayoutTitle)
+    pptSlide.Shapes(1).TextFrame.TextRange.Text = "Feature Engineering and Extraction"
+    pptSlide.Shapes(2).TextFrame.TextRange.Text = "An In-depth Overview and Hands-on Session"
+    
+    ' Slide 2: Introduction
+    Set pptSlide = pptPresentation.Slides.Add(2, ppLayoutText)
+    pptSlide.Shapes(1).TextFrame.TextRange.Text = "Part I: Theoretical Understanding"
+    pptSlide.Shapes(2).TextFrame.TextRange.Text = "This section will cover: " & vbCrLf & _
+                                                 "1. What is Feature Engineering?" & vbCrLf & _
+                                                 "2. Types of Features" & vbCrLf & _
+                                                 "3. Feature Extraction vs Feature Engineering" & vbCrLf & _
+                                                 "4. Case Studies" & vbCrLf & _
+                                                 "5. Common Techniques"
+    
+    ' Slide 3: What is Feature Engineering?
+    Set pptSlide = pptPresentation.Slides.Add(3, ppLayoutText)
+    pptSlide.Shapes(1).TextFrame.TextRange.Text = "What is Feature Engineering?"
+    pptSlide.Shapes(2).TextFrame.TextRange.Text = "Definition: The process of transforming raw data into a format that is better suited for machine learning models." & vbCrLf & _
+                                                 "Importance: Better features lead to better model performance." & vbCrLf & _
+                                                 "Requires: Often requires domain expertise to create effective features." & vbCrLf & _
+                                                 "Goal: Improve model performance, and reduce computational or data needs."
+                                                 
+    ' Slide 4: Types of Features
+    Set pptSlide = pptPresentation.Slides.Add(4, ppLayoutText)
+    pptSlide.Shapes(1).TextFrame.TextRange.Text = "Types of Features"
+    pptSlide.Shapes(2).TextFrame.TextRange.Text = "Numerical: Represented by integers or real numbers. Example: Age, Salary." & vbCrLf & _
+                                                 "Categorical: Discrete set of values or labels. Example: Colors, Brands." & vbCrLf & _
+                                                 "Ordinal: Ordered categories. Example: Ratings (High, Medium, Low)." & vbCrLf & _
+                                                 "Text: Unstructured data that needs NLP techniques for feature extraction." & vbCrLf & _
+                                                 "Time-Series: Ordered data points collected over time. Useful in forecasting." & vbCrLf & _
+                                                 "Images: Pixel data, requires techniques like convolution for feature extraction."
+    ' Add Python code for one-hot encoding of Categorical Data
+    Set pptSlide = pptPresentation.Slides.Add(5, ppLayoutText)
+    pptSlide.Shapes(1).TextFrame.TextRange.Text = "Python Code: One-hot Encoding for Categorical Data"
+    pptSlide.Shapes(2).TextFrame.TextRange.Text = "from sklearn.preprocessing import OneHotEncoder" & vbCrLf & _
+                                                 "encoder = OneHotEncoder()" & vbCrLf & _
+                                                 "encoded_features = encoder.fit_transform(df[['color']]).toarray()"
+    
+    ' Continue with remaining slides using similar format
+    
+End Sub
+
+
+
+
+
+
+Slide 6: Feature Extraction vs Feature Engineering
+Content:
+
+"Feature Extraction aims to reduce dimensionality or extract useful information."
+"Feature Engineering requires domain expertise to create new features."
+"Feature Extraction is more automated while Feature Engineering can be manual."
+"Python libraries like PCA for Feature Extraction and scikit-learn for Feature Engineering."
+Slide 7: Python Code Sample for Feature Extraction using PCA
+Content:
+
+scss
+Copy code
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+Slide 8: Case Studies: Importance in Real-world Applications
+Content:
+
+"Finance: Fraud detection algorithms require engineered features like transaction patterns."
+"Healthcare: Predicting patient readmissions with historical data and vitals."
+"Retail: Personalization engines use features like user behavior and product metadata."
+Slide 9: Common Techniques in Feature Engineering
+Content:
+
+"Transformation: Converting data into another format. E.g., log transformation."
+"Normalization: Scaling features to have a similar range."
+"Binning: Grouping continuous features into intervals."
+"Encoding: Transforming categorical features into a numerical format."
+Slide 10: Python Code Sample for Binning and Encoding
+Content:
+
+bash
+Copy code
+# Binning
+df['Age_bin'] = pd.cut(df['Age'], bins=[20, 40, 60, 80])
+
+# Encoding
+df['Gender_encoded'] = df['Gender'].map({'Male': 1, 'Female': 0})
+Slide 11: Part II: Practical Session
+Content:
+
+"Hands-on activities for feature engineering."
+"Work with real-world datasets."
+"Python Libraries: scikit-learn, pandas, NumPy."
+Slide 12: Tools and Libraries for Feature Engineering
+Content:
+
+"Scikit-learn: Provides a wide range of feature engineering techniques."
+"Pandas: Useful for data manipulation tasks."
+"NumPy: Provides support for numerical operations."
+Slide 13: Hands-on: Feature Engineering on Numerical Data
+Content:
+
+"Scaling: Min-Max Scaling, Standard Scaling."
+"Python Code Sample:"
+lua
+Copy code
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[['Age', 'Salary']] = scaler.fit_transform(df[['Age', 'Salary']])
+Slide 14: Hands-on: Feature Engineering on Categorical Data
+Content:
+
+"One-Hot Encoding, Label Encoding."
+"Python Code Sample:"
+css
+Copy code
+from sklearn.preprocessing import LabelEncoder
+encoder = LabelEncoder()
+df['Gender'] = encoder.fit_transform(df['Gender'])
+Slide 15: Hands-on: Text Feature Extraction
+Content:
+
+"Techniques: TF-IDF, Word Embeddings."
+"Python Code Sample:"
+scss
+Copy code
+from sklearn.feature_extraction.text import TfidfVectorizer
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(corpus)
+Slide 16: Q&A for Practical Session
+Content:
+
+"Open for any questions related to the practical session."
+Slide 17: Part III: Advanced Topics
+Content:
+
+"Automated Feature Engineering."
+"Feature Selection Techniques."
+"Pitfalls and Best Practices."
+Slide 18: Automated Feature Engineering
+Content:
+
+"Libraries like Featuretools can automatically create new features."
+"Python Code Sample:"
+python
+Copy code
+import featuretools as ft
+es = ft.EntitySet(id = 'data')
+es = es.entity_from_dataframe(entity_id='data_id', dataframe=df, ...)
+features, feature_defs = ft.dfs(entityset=es, target_entity='data_id')
+Slide 19: Feature Selection Techniques
+Content:
+
+"Methods include Recursive Feature Elimination, Feature Importance."
+"Python Code Sample:"
+scss
+Copy code
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+rfe = RFE(model, 3)
+fit = rfe.fit(X, Y)
+Slide 20: Pitfalls and Best Practices
+Content:
+
+"Overfitting: Creating too many features might lead to overfitting."
+"Relevance: Not all created features are useful."
+"Data leakage: Make sure the feature doesn't include information from the target variable."
+You can add these contents to your VBA script following the pattern established for the earlier slides. Each slide will now have between 5-10 lines or bullet points of relevant content along with Python code samples where applicable
+
+
+
+
 
 You can use the Pandas library in Python to read multiple sheets from an Excel workbook and then consolidate the information into a single DataFrame (i.e., a single sheet). You can then write this consolidated DataFrame back into a new Excel sheet.
 
