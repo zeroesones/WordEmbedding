@@ -1,3 +1,28 @@
+
+import pandas as pd
+
+# Create a DataFrame with 10 rows of sample data for loan applicants
+data = {
+    'Annual_Income': [50000, 75000, 100000, 120000, 90000, 60000, 55000, 65000, 70000, 110000],
+    'Credit_Score': [700, 750, 800, 650, 720, 690, 710, 730, 760, 790],
+    'Employment_Length': [5, 10, 2, 8, 4, 6, 1, 7, 9, 3],
+    'Debt_to_Income_Ratio': [0.2, 0.3, 0.1, 0.4, 0.15, 0.25, 0.35, 0.22, 0.18, 0.28],
+    'Loan_Amount_Requested': [20000, 30000, 10000, 50000, 15000, 25000, 7000, 12000, 18000, 22000],
+    'Loan_Purpose': ['Home', 'Debt Consolidation', 'Education', 'Business', 'Travel', 'Medical', 'Other', 'Home', 'Business', 'Education'],
+    'Home_Ownership_Status': ['Own', 'Mortgage', 'Rent', 'Own', 'Rent', 'Mortgage', 'Rent', 'Own', 'Mortgage', 'Rent'],
+    'Number_of_Open_Accounts': [4, 3, 6, 5, 2, 7, 4, 3, 5, 6],
+    'Number_of_Late_Payments': [0, 1, 0, 2, 1, 0, 1, 0, 0, 1]
+}
+
+df = pd.DataFrame(data)
+
+# Display the DataFrame
+print(df)
+
+
+
+
+
 Sub CreateFeatureEngineeringPresentation()
 
     Dim pptApp As Object
