@@ -1,3 +1,72 @@
+Sub CreatePowerPoint()
+
+    Dim pptApp As Object
+    Dim pptPresentation As Object
+    Dim pptSlide As Object
+    Dim pptTextbox As Object
+
+    ' Create a new PowerPoint application
+    Set pptApp = CreateObject("PowerPoint.Application")
+    pptApp.Visible = True
+    
+    ' Create a new Presentation
+    Set pptPresentation = pptApp.Presentations.Add
+    
+    ' Slide 1
+    Set pptSlide = pptPresentation.Slides.Add(1, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "What are Features?"
+    
+    ' Slide 2
+    Set pptSlide = pptPresentation.Slides.Add(2, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Steps in Feature Engineering"
+    pptSlide.Shapes.Placeholders(2).TextFrame.TextRange.Text = "Data collection, Data cleaning, Data transformation, and Feature generation."
+    
+    ' Slide 3
+    Set pptSlide = pptPresentation.Slides.Add(3, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Types of Feature Engineering"
+    pptSlide.Shapes.Placeholders(2).TextFrame.TextRange.Text = "Handling Missing Values" & vbNewLine & "Remove Rows with Missing Values" & vbNewLine & "Imputation"
+
+    ' Slide 4
+    Set pptSlide = pptPresentation.Slides.Add(4, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Categorical Encoding"
+    pptSlide.Shapes.Placeholders(2).TextFrame.TextRange.Text = "Machine learning models usually require numerical inputs. Categorical variables should be converted into a format that could provide the algorithm with meaningful information."
+
+    ' Slide 5
+    Set pptSlide = pptPresentation.Slides.Add(5, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Normalization and Scaling"
+    
+    ' Slide 6
+    Set pptSlide = pptPresentation.Slides.Add(6, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Feature Selection"
+    pptSlide.Shapes.Placeholders(2).TextFrame.TextRange.Text = "Feature selection is the process of choosing the most relevant features in your data that contribute most to the prediction variable or output. Ignoring the irrelevant features can lead to a model that is easier to interpret, quicker to train, and more accurate."
+    
+    ' Slide 7
+    Set pptSlide = pptPresentation.Slides.Add(7, ppLayoutText)
+    pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Methods for Feature Selection"
+    pptSlide.Shapes.Placeholders(2).TextFrame.TextRange.Text = "Filter Methods - Univariate Selection, Correlation Matrix and Heatmap, Feature Importance" & vbNewLine & "Wrapper Methods - Recursive Feature Estimation, Forward Selection, Backward Elimination" & vbNewLine & "Embedded Methods - Lasso Regression/ L1 regularization, Ridge Regression/ L2 regularization, Tree-based methods (Random Forest, Gradient Boosting)"
+    
+    ' Clean up
+    Set pptSlide = Nothing
+    Set pptPresentation = Nothing
+    Set pptApp = Nothing
+
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import pandas as pd
 
