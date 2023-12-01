@@ -18,7 +18,10 @@ def split_pdf_to_individual_pages(pdf_file_path, output_folder):
 
     pdf_document = fitz.open(pdf_file_path)
 
-    for page_number in range(pdf_document.page_count):
+    # Get the total number of pages in the document
+    total_pages = pdf_document.page_count
+
+    for page_number in range(total_pages):
         page = pdf_document.load_page(page_number)
         page_text = page.get_text()
 
@@ -26,8 +29,15 @@ def split_pdf_to_individual_pages(pdf_file_path, output_folder):
 
         if coper_id:
             output_file_path = os.path.join(output_folder, f"{coper_id}.pdf")
+            
+            # Create a new PDF document with a single page
             new_document = fitz.open()
-            new_document.insert_page(page_number)
+            new_page = new_document.new_page(width=page.width, height=page.height)
+            
+            # Copy the content from the original page to the new page
+            new_page.show_pdf_page(page.rect, pdf_document, page_number)
+            
+            # Save the new document with the corresponding name
             new_document.save(output_file_path)
 
 def main():
