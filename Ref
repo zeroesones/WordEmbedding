@@ -1,29 +1,42 @@
 import fitz  # PyMuPDF
-import pandas as pd
+import re
+import os
 
-def extract_text_from_word_doc(docx_file_path):
-    pdf_document = fitz.open(docx_file_path)
-    text_pages = {}
+def extract_coper_id(page_text):
+    # Extract the "Our Reference: " followed by a number
+    match = re.search(r'Our Reference:\s*(\d+)', page_text)
+    
+    if match:
+        coper_id = match.group(1).strip()  # Extracted number without padded spaces
+        return coper_id
+    else:
+        return None
+
+def split_pdf_to_individual_pages(pdf_file_path, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    pdf_document = fitz.open(pdf_file_path)
 
     for page_number in range(pdf_document.page_count):
         page = pdf_document.load_page(page_number)
         page_text = page.get_text()
-        text_pages[f"Page{page_number + 1}"] = page_text.replace('\n', '')  # Remove page breaks
 
-    return text_pages
+        coper_id = extract_coper_id(page_text)
+
+        if coper_id:
+            output_file_path = os.path.join(output_folder, f"{coper_id}.pdf")
+            new_document = fitz.open()
+            new_document.insert_page(page_number)
+            new_document.save(output_file_path)
 
 def main():
-    docx_file_path = "your_word_document.docx"  # Replace with the path to your Word document
-    extracted_text = extract_text_from_word_doc(docx_file_path)
+    pdf_file_path = "your_input.pdf"  # Replace with the path to your PDF document
+    output_folder = "output_pdfs"  # Folder where individual PDFs will be saved
+
+    split_pdf_to_individual_pages(pdf_file_path, output_folder)
     
-    # Convert the extracted text into a Pandas DataFrame
-    df = pd.DataFrame.from_dict(extracted_text, orient='index', columns=['Text'])
-    
-    # Save the DataFrame to a JSON file
-    output_file_path = "output.json"
-    df.to_json(output_file_path, orient='index')
-    
-    print(f"JSON data saved to {output_file_path}")
+    print(f"PDFs split and saved to {output_folder}")
 
 if __name__ == "__main__":
     main()
