@@ -1,20 +1,14 @@
-import docx
+import fitz  # PyMuPDF
 import json
 
 def extract_text_from_word_doc(docx_file_path):
-    # Open the Word document
-    doc = docx.Document(docx_file_path)
-
+    pdf_document = fitz.open(docx_file_path)
     text_pages = {}
 
-    # Iterate through the paragraphs and group them by page
-    current_page = None
-    for paragraph in doc.paragraphs:
-        if paragraph.page_number != current_page:
-            current_page = paragraph.page_number
-            text_pages[f"Page{current_page}"] = ""
-
-        text_pages[f"Page{current_page}"] += paragraph.text + "\n"
+    for page_number in range(pdf_document.page_count):
+        page = pdf_document.load_page(page_number)
+        page_text = page.get_text()
+        text_pages[f"Page{page_number + 1}"] = page_text
 
     return text_pages
 
