@@ -1,15 +1,14 @@
-import docx2txt
-import json
+import fitz  # PyMuPDF
+import pandas as pd
 
 def extract_text_from_word_doc(docx_file_path):
-    text = docx2txt.process(docx_file_path)
+    pdf_document = fitz.open(docx_file_path)
     text_pages = {}
 
-    # Split the text by page breaks (assuming each page is separated by a page break)
-    pages = text.split('\f')
-
-    for page_number, page_text in enumerate(pages, start=1):
-        text_pages[f"Page{page_number}"] = page_text
+    for page_number in range(pdf_document.page_count):
+        page = pdf_document.load_page(page_number)
+        page_text = page.get_text()
+        text_pages[f"Page{page_number + 1}"] = page_text.replace('\n', '')  # Remove page breaks
 
     return text_pages
 
@@ -17,11 +16,14 @@ def main():
     docx_file_path = "your_word_document.docx"  # Replace with the path to your Word document
     extracted_text = extract_text_from_word_doc(docx_file_path)
     
-    # Convert the extracted text into JSON format
-    json_output = json.dumps(extracted_text, indent=4)
+    # Convert the extracted text into a Pandas DataFrame
+    df = pd.DataFrame.from_dict(extracted_text, orient='index', columns=['Text'])
     
-    # Print or save the JSON data
-    print(json_output)
+    # Save the DataFrame to a JSON file
+    output_file_path = "output.json"
+    df.to_json(output_file_path, orient='index')
+    
+    print(f"JSON data saved to {output_file_path}")
 
 if __name__ == "__main__":
     main()
