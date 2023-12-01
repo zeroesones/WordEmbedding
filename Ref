@@ -1,14 +1,15 @@
-import fitz  # PyMuPDF
+import docx2txt
 import json
 
 def extract_text_from_word_doc(docx_file_path):
-    pdf_document = fitz.open(docx_file_path)
+    text = docx2txt.process(docx_file_path)
     text_pages = {}
 
-    for page_number in range(pdf_document.page_count):
-        page = pdf_document.load_page(page_number)
-        page_text = page.get_text()
-        text_pages[f"Page{page_number + 1}"] = page_text
+    # Split the text by page breaks (assuming each page is separated by a page break)
+    pages = text.split('\f')
+
+    for page_number, page_text in enumerate(pages, start=1):
+        text_pages[f"Page{page_number}"] = page_text
 
     return text_pages
 
