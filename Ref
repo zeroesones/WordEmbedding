@@ -1,52 +1,58 @@
-import fitz  # PyMuPDF
 import re
-import os
 
-def extract_coper_id(page_text):
-    # Extract the "Our Reference: " followed by a number
-    match = re.search(r'Our Reference:\s*(\d+)', page_text)
+def highlight_and_mark(sentences, app_names):
+    pass_criteria = [
+        r'0 errors',
+        r'100% completion',
+        r'within 2 hours',
+        r'less than 60 seconds'
+    ]
+
+    # ANSI escape code for bold
+    BOLD = '\033[1m'
+    END = '\033[0m'
     
-    if match:
-        coper_id = match.group(1).strip()  # Extracted number without padded spaces
-        return coper_id
-    else:
-        return None
+    for sentence in sentences:
+        marked_sentence = sentence
+        status = 'Fail'
+        criteria_matched = False
+        app_name_matched = False
 
-def split_pdf_to_individual_pages(pdf_file_path, output_folder):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+        # Check for pass criteria
+        for criterion in pass_criteria:
+            if re.search(criterion, sentence, re.IGNORECASE):
+                highlighted_phrase = re.search(criterion, sentence, re.IGNORECASE).group()
+                marked_sentence = marked_sentence.replace(highlighted_phrase, f'{BOLD}{highlighted_phrase}{END}')
+                criteria_matched = True
+                break
 
-    pdf_document = fitz.open(pdf_file_path)
+        # Check for application names
+        for app_name in app_names:
+            if re.search(app_name, sentence, re.IGNORECASE):
+                highlighted_phrase = re.search(app_name, sentence, re.IGNORECASE).group()
+                marked_sentence = marked_sentence.replace(highlighted_phrase, f'{BOLD}{highlighted_phrase}{END}')
+                app_name_matched = True
+                break
 
-    # Get the total number of pages in the document
-    total_pages = pdf_document.page_count
+        # Mark as pass only if both conditions are met
+        if criteria_matched and app_name_matched:
+            status = 'Pass'
+        
+        print(f'Sentence: {marked_sentence}\nStatus: {status}\n')
 
-    for page_number in range(total_pages):
-        page = pdf_document.load_page(page_number)
-        page_text = page.get_text()
+# Sample sentences
+sentences = [
+    "The deployment of MyApp was successful with 0 errors encountered during the process.",
+    "Several issues were identified during the deployment of OtherApp, requiring immediate attention.",
+    "Deployment of MyApp achieved 100% completion without any interruptions or issues.",
+    "The deployment of MyApp is still ongoing and has not yet reached completion.",
+    "The entire deployment process for AnotherApp was completed within 2 hours, meeting the time efficiency criteria.",
+    "Due to unexpected delays, MyApp's deployment exceeded the 2-hour time limit.",
+    "Each module of MyApp was deployed in less than 60 seconds, showcasing excellent performance.",
+    "Some modules of MyApp took longer than 60 seconds to deploy, indicating potential performance issues."
+]
 
-        coper_id = extract_coper_id(page_text)
+# List of application names
+app_names = ["MyApp", "OtherApp", "AnotherApp"]
 
-        if coper_id:
-            output_file_path = os.path.join(output_folder, f"{coper_id}.pdf")
-            
-            # Create a new PDF document with a single page
-            new_document = fitz.open()
-            new_page = new_document.new_page(width=page.width, height=page.height)
-            
-            # Copy the content from the original page to the new page
-            new_page.show_pdf_page(page.rect, pdf_document, page_number)
-            
-            # Save the new document with the corresponding name
-            new_document.save(output_file_path)
-
-def main():
-    pdf_file_path = "your_input.pdf"  # Replace with the path to your PDF document
-    output_folder = "output_pdfs"  # Folder where individual PDFs will be saved
-
-    split_pdf_to_individual_pages(pdf_file_path, output_folder)
-    
-    print(f"PDFs split and saved to {output_folder}")
-
-if __name__ == "__main__":
-    main()
+highlight_and_mark(sentences, app_names)
