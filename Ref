@@ -1,3 +1,63 @@
+Certainly! To create a VBA script that transfers data from Sheet2 to a new sheet based only on the column names listed in Sheet1, follow these steps:
+
+### Step 1: Prepare Your Excel Workbook
+- **Sheet1**: Contains the list of column names you want to copy from Sheet2.
+- **Sheet2**: Contains the complete dataset.
+
+### Step 2: Open VBA Editor
+- In Excel, press `Alt + F11` to open the VBA Editor.
+
+### Step 3: Insert a New Module
+- In the VBA Editor, right-click on any of the items in the 'Project - VBAProject' pane, go to `Insert`, and then select `Module`.
+
+### Step 4: Write the VBA Code
+- In the new module window, copy and paste the following VBA code:
+
+```vba
+Sub CopySelectedColumns()
+    Dim wsSource As Worksheet, wsTarget As Worksheet, wsList As Worksheet
+    Dim rList As Range, rCell As Range
+    Dim iCol As Integer, lastRow As Long
+
+    Set wsList = ThisWorkbook.Sheets("Sheet1")
+    Set wsSource = ThisWorkbook.Sheets("Sheet2")
+    Set wsTarget = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsTarget.Name = "FilteredData"
+
+    lastRow = wsList.Cells(wsList.Rows.Count, 1).End(xlUp).Row
+    Set rList = wsList.Range("A1:A" & lastRow)
+
+    iCol = 1
+    For Each rCell In rList
+        Dim colNumber As Integer
+        colNumber = 0
+        On Error Resume Next
+        colNumber = Application.Match(rCell.Value, wsSource.Rows(1), 0)
+        On Error GoTo 0
+
+        If colNumber > 0 Then
+            wsSource.Columns(colNumber).Copy Destination:=wsTarget.Columns(iCol)
+            iCol = iCol + 1
+        End If
+    Next rCell
+End Sub
+```
+
+### Step 5: Run the Script
+- Close the VBA Editor and return to Excel.
+- Press `Alt + F8`, select `CopySelectedColumns`, and click 'Run'.
+
+### Step 6: Check the New Sheet
+- A new sheet named "FilteredData" will be created with columns from Sheet2 that match the names in Sheet1.
+
+### Important Notes:
+- The script assumes that the column names in Sheet1 are located in Column A and start from A1.
+- Make sure the column names in Sheet1 exactly match those in Sheet2.
+- The script creates a new sheet every time you run it. If "FilteredData" already exists, you might get an error or unexpected behavior, so you may want to delete or rename the old "FilteredData" sheet before running the script again.
+- Always backup your Excel file before running VBA scripts to avoid accidental data loss.
+
+
+
 import re
 
 def highlight_and_mark(sentences, app_names):
