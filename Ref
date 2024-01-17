@@ -1,118 +1,41 @@
-Certainly! To create a VBA script that transfers data from Sheet2 to a new sheet based only on the column names listed in Sheet1, follow these steps:
+import pandas as pd
 
-### Step 1: Prepare Your Excel Workbook
-- **Sheet1**: Contains the list of column names you want to copy from Sheet2.
-- **Sheet2**: Contains the complete dataset.
+# Example DataFrame with specific column names and a 'Contract_Date' column
+# Replace this with your actual DataFrame
+data = {
+    'Col1': [1, 2, 1, 4, 5],
+    'Col2': ['a', 'b', 'c', 'd', 'e'],
+    **{f'Col{i}': [i, i, i, i, i] for i in range(3, 51)},
+    'Contract_Date': pd.date_range(start='2021-01-01', periods=5, freq='D')
+}
+df = pd.DataFrame(data)
 
-### Step 2: Open VBA Editor
-- In Excel, press `Alt + F11` to open the VBA Editor.
+# Convert 'Contract_Date' to datetime
+df['Contract_Date'] = pd.to_datetime(df['Contract_Date'])
 
-### Step 3: Insert a New Module
-- In the VBA Editor, right-click on any of the items in the 'Project - VBAProject' pane, go to `Insert`, and then select `Module`.
+# Processing each column
+# For Col1
+col1_unique = df['Col1'].unique()
 
-### Step 4: Write the VBA Code
-- In the new module window, copy and paste the following VBA code:
+# For Col2
+col2_concat = ' '.join(df['Col2'].astype(str))
 
-```vba
-Sub CopySelectedColumns()
-    Dim wsSource As Worksheet, wsTarget As Worksheet, wsList As Worksheet
-    Dim rList As Range, rCell As Range
-    Dim iCol As Integer, lastRow As Long
+# For Col3 to Col50
+unique_values = {}
+for col in df.columns[2:50]:  # Iterating over column names directly
+    # Filter out rows where Contract_Date is NaT (Not a Time)
+    with_dates = df.dropna(subset=['Contract_Date'])
 
-    Set wsList = ThisWorkbook.Sheets("Sheet1")
-    Set wsSource = ThisWorkbook.Sheets("Sheet2")
-    Set wsTarget = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-    wsTarget.Name = "FilteredData"
+    if not with_dates.empty and with_dates[col].nunique() > 1:
+        # Select the value with the latest Contract_Date
+        latest_value = with_dates.sort_values(by='Contract_Date', ascending=False).drop_duplicates(subset=col).iloc[0][col]
+        unique_values[col] = latest_value
+    else:
+        # Concatenate unique values separated by space
+        unique_concat = ' '.join(map(str, df[col].unique()))
+        unique_values[col] = unique_concat
 
-    lastRow = wsList.Cells(wsList.Rows.Count, 1).End(xlUp).Row
-    Set rList = wsList.Range("A1:A" & lastRow)
+# Combining results into a single row DataFrame
+final_row = pd.DataFrame([[col1_unique, col2_concat, *unique_values.values()]], columns=['Col1', 'Col2', *unique_values.keys()])
 
-    iCol = 1
-    For Each rCell In rList
-        Dim colNumber As Integer
-        colNumber = 0
-        On Error Resume Next
-        colNumber = Application.Match(rCell.Value, wsSource.Rows(1), 0)
-        On Error GoTo 0
-
-        If colNumber > 0 Then
-            wsSource.Columns(colNumber).Copy Destination:=wsTarget.Columns(iCol)
-            iCol = iCol + 1
-        End If
-    Next rCell
-End Sub
-```
-
-### Step 5: Run the Script
-- Close the VBA Editor and return to Excel.
-- Press `Alt + F8`, select `CopySelectedColumns`, and click 'Run'.
-
-### Step 6: Check the New Sheet
-- A new sheet named "FilteredData" will be created with columns from Sheet2 that match the names in Sheet1.
-
-### Important Notes:
-- The script assumes that the column names in Sheet1 are located in Column A and start from A1.
-- Make sure the column names in Sheet1 exactly match those in Sheet2.
-- The script creates a new sheet every time you run it. If "FilteredData" already exists, you might get an error or unexpected behavior, so you may want to delete or rename the old "FilteredData" sheet before running the script again.
-- Always backup your Excel file before running VBA scripts to avoid accidental data loss.
-
-
-
-import re
-
-def highlight_and_mark(sentences, app_names):
-    pass_criteria = [
-        r'0 errors',
-        r'100% completion',
-        r'within 2 hours',
-        r'less than 60 seconds'
-    ]
-
-    # ANSI escape code for bold
-    BOLD = '\033[1m'
-    END = '\033[0m'
-    
-    for sentence in sentences:
-        marked_sentence = sentence
-        status = 'Fail'
-        criteria_matched = False
-        app_name_matched = False
-
-        # Check for pass criteria
-        for criterion in pass_criteria:
-            if re.search(criterion, sentence, re.IGNORECASE):
-                highlighted_phrase = re.search(criterion, sentence, re.IGNORECASE).group()
-                marked_sentence = marked_sentence.replace(highlighted_phrase, f'{BOLD}{highlighted_phrase}{END}')
-                criteria_matched = True
-                break
-
-        # Check for application names
-        for app_name in app_names:
-            if re.search(app_name, sentence, re.IGNORECASE):
-                highlighted_phrase = re.search(app_name, sentence, re.IGNORECASE).group()
-                marked_sentence = marked_sentence.replace(highlighted_phrase, f'{BOLD}{highlighted_phrase}{END}')
-                app_name_matched = True
-                break
-
-        # Mark as pass only if both conditions are met
-        if criteria_matched and app_name_matched:
-            status = 'Pass'
-        
-        print(f'Sentence: {marked_sentence}\nStatus: {status}\n')
-
-# Sample sentences
-sentences = [
-    "The deployment of MyApp was successful with 0 errors encountered during the process.",
-    "Several issues were identified during the deployment of OtherApp, requiring immediate attention.",
-    "Deployment of MyApp achieved 100% completion without any interruptions or issues.",
-    "The deployment of MyApp is still ongoing and has not yet reached completion.",
-    "The entire deployment process for AnotherApp was completed within 2 hours, meeting the time efficiency criteria.",
-    "Due to unexpected delays, MyApp's deployment exceeded the 2-hour time limit.",
-    "Each module of MyApp was deployed in less than 60 seconds, showcasing excellent performance.",
-    "Some modules of MyApp took longer than 60 seconds to deploy, indicating potential performance issues."
-]
-
-# List of application names
-app_names = ["MyApp", "OtherApp", "AnotherApp"]
-
-highlight_and_mark(sentences, app_names)
+print(final_row)
