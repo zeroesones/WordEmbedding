@@ -1,41 +1,37 @@
-import pandas as pd
+!pip install splunk-sdk
 
-# Example DataFrame with specific column names and a 'Contract_Date' column
-# Replace this with your actual DataFrame
-data = {
-    'Col1': [1, 2, 1, 4, 5],
-    'Col2': ['a', 'b', 'c', 'd', 'e'],
-    **{f'Col{i}': [i, i, i, i, i] for i in range(3, 51)},
-    'Contract_Date': pd.date_range(start='2021-01-01', periods=5, freq='D')
-}
-df = pd.DataFrame(data)
+import splunklib.client as client
+import splunklib.results as results
 
-# Convert 'Contract_Date' to datetime
-df['Contract_Date'] = pd.to_datetime(df['Contract_Date'])
+# Splunk server connection parameters
+HOST = "your_splunk_host"
+PORT = 8089  # Default port for Splunk
+USERNAME = "your_username"
+PASSWORD = "your_password"
 
-# Processing each column
-# For Col1
-col1_unique = df['Col1'].unique()
+# Create a Service instance and log in 
+service = client.connect(
+    host=HOST,
+    port=PORT,
+    username=USERNAME,
+    password=PASSWORD)
 
-# For Col2
-col2_concat = ' '.join(df['Col2'].astype(str))
+# Your search query - this is a basic one
+searchquery_normal = "search * | head 10"
 
-# For Col3 to Col50
-unique_values = {}
-for col in df.columns[2:50]:  # Iterating over column names directly
-    # Filter out rows where Contract_Date is NaT (Not a Time)
-    with_dates = df.dropna(subset=['Contract_Date'])
+# Create a job to perform the search
+job = service.jobs.create(searchquery_normal)
 
-    if not with_dates.empty and with_dates[col].nunique() > 1:
-        # Select the value with the latest Contract_Date
-        latest_value = with_dates.sort_values(by='Contract_Date', ascending=False).drop_duplicates(subset=col).iloc[0][col]
-        unique_values[col] = latest_value
-    else:
-        # Concatenate unique values separated by space
-        unique_concat = ' '.join(map(str, df[col].unique()))
-        unique_values[col] = unique_concat
+# Wait for the job to complete
+while True:
+    while not job.is_ready():
+        pass
+    if job["isDone"] == "1":
+        break
 
-# Combining results into a single row DataFrame
-final_row = pd.DataFrame([[col1_unique, col2_concat, *unique_values.values()]], columns=['Col1', 'Col2', *unique_values.keys()])
+# Get the results and print them
+for result in results.ResultsReader(job.results()):
+    print(result)
 
-print(final_row)
+# Finalize the job
+job.finalize()
