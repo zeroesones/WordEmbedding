@@ -1,13 +1,14 @@
 import pandas as pd
 from dateutil.parser import parse
 import re
+from datetime import datetime
 
 # Sample DataFrame
 data = {
     'sentences': [
-        'The event was on September 28,2009, and the follow-up was on October 2, 2009.',
-        'Our meeting is scheduled for 07 January 2005.',
-        'The deadline is January 7,2005.',
+        'The event was on September 28, and the follow-up was on October 2.',
+        'Our meeting is scheduled for 07 January.',
+        'The deadline is January 7.',
         'Appointment on 1 March 2017.'
     ]
 }
@@ -17,12 +18,17 @@ df = pd.DataFrame(data)
 # Function to extract all dates and return the latest one
 def extract_latest_date(sentence):
     dates = []
+    today = datetime.today()
     remaining_sentence = sentence
+
     while True:
         try:
             # Extract the first date
             date = parse(remaining_sentence, fuzzy=True, default=None)
             if date:
+                # Adjust the year if it's in the future
+                if date > today:
+                    date = date.replace(year=today.year - 1)
                 dates.append(date)
                 # Remove the part of the sentence up to and including the found date
                 remaining_sentence = re.sub(r'^.*?\b{}\b'.format(re.escape(str(date.date()))), '', remaining_sentence, 1)
@@ -30,6 +36,7 @@ def extract_latest_date(sentence):
                 break
         except (ValueError, TypeError):
             break
+
     if dates:
         return max(dates)
     else:
