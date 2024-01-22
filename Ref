@@ -1,45 +1,41 @@
 import pandas as pd
-import re
 from dateutil.parser import parse
-from datetime import datetime
+import re
 
 # Sample DataFrame
 data = {
     'sentences': [
-        'The event was on August 14, 2006.',
-        'Our meeting is scheduled for January 7,2005.',
-        'Appointment on 1st day of January, 2005.',
-        'This sentence does not contain a date.'
+        'The event was on September 28,2009, and the follow-up was on October 2, 2009.',
+        'Our meeting is scheduled for 07 January 2005.',
+        'The deadline is January 7,2005.',
+        'Appointment on 1 March 2017.'
     ]
 }
 
 df = pd.DataFrame(data)
 
-# Function to extract and parse dates
-def extract_dates(sentence):
-    # Regular expressions for various date formats
-    date_patterns = [
-        r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s*\d{4}',
-        r'\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December),?\s*\d{4}',
-        r'\d{1,2}(?:st|nd|rd|th)?\s+day\s+of\s+(?:January|February|March|April|May|June|July|August|September|October|November|December),?\s*\d{4}'
-    ]
-
-    for pattern in date_patterns:
-        matches = re.findall(pattern, sentence, re.IGNORECASE)
-        for match in matches:
-            try:
-                # Parse standard date formats
-                if 'day of' not in match:
-                    return parse(match, fuzzy=False)
-                else:
-                    # Handle '1st day of January, 2005' format
-                    day, month, year = re.search(r'(\d{1,2})(?:st|nd|rd|th)?\s+day\s+of\s+(\w+),?\s*(\d{4})', match, re.IGNORECASE).groups()
-                    return datetime.strptime(f'{day} {month} {year}', '%d %B %Y')
-            except (ValueError, TypeError):
-                continue
-    return None
+# Function to extract all dates and return the latest one
+def extract_latest_date(sentence):
+    dates = []
+    remaining_sentence = sentence
+    while True:
+        try:
+            # Extract the first date
+            date = parse(remaining_sentence, fuzzy=True, default=None)
+            if date:
+                dates.append(date)
+                # Remove the part of the sentence up to and including the found date
+                remaining_sentence = re.sub(r'^.*?\b{}\b'.format(re.escape(str(date.date()))), '', remaining_sentence, 1)
+            else:
+                break
+        except (ValueError, TypeError):
+            break
+    if dates:
+        return max(dates)
+    else:
+        return None
 
 # Apply the function to the DataFrame
-df['extracted_dates'] = df['sentences'].apply(extract_dates)
+df['extracted_dates'] = df['sentences'].apply(extract_latest_date)
 
 print(df)
