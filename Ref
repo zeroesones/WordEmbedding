@@ -1,48 +1,45 @@
-import pandas as pd
-from dateutil.parser import parse
 import re
-from datetime import datetime
+from dateutil.parser import parse
 
-# Sample DataFrame
-data = {
-    'sentences': [
-        'The event was on September 28, and the follow-up was on October 2.',
-        'Our meeting is scheduled for 07 January.',
-        'The deadline is January 7.',
-        'Appointment on 1 March 2017.'
-    ]
-}
+def extract_latest_date_precise_corrected(sentence):
+    corrected_sentence = sentence.replace('I', '1').replace(',', ', ')
 
-df = pd.DataFrame(data)
+    date_pattern_of = r'(\d{1,2})(st|nd|rd|th)?\s(of)\s([JFMASOND][a-z]*)\s*,?\s*(\d{4})'
+    date_matches_of = re.findall(date_pattern_of, corrected_sentence)
+    
+    date_pattern_general = r'([JFMASOND][a-z]{2,9}\s+\d{1,2},?\s+\d{4})'
+    date_matches_general = re.findall(date_pattern_general, corrected_sentence)
 
-# Function to extract all dates and return the latest one
-def extract_latest_date(sentence):
-    dates = []
-    today = datetime.today()
-    remaining_sentence = sentence
-
-    while True:
+    extracted_dates = []
+    for match in date_matches_of:
+        date_str = ' '.join([match[0], match[3], match[4]])
         try:
-            # Extract the first date
-            date = parse(remaining_sentence, fuzzy=True, default=None)
-            if date:
-                # Adjust the year if it's in the future
-                if date > today:
-                    date = date.replace(year=today.year - 1)
-                dates.append(date)
-                # Remove the part of the sentence up to and including the found date
-                remaining_sentence = re.sub(r'^.*?\b{}\b'.format(re.escape(str(date.date()))), '', remaining_sentence, 1)
-            else:
-                break
-        except (ValueError, TypeError):
-            break
+            date_obj = parse(date_str, fuzzy=True, dayfirst=True)
+            extracted_dates.append(date_obj)
+        except ValueError:
+            continue
 
-    if dates:
-        return max(dates)
+    for date_str in date_matches_general:
+        try:
+            date_obj = parse(date_str, fuzzy=True)
+            extracted_dates.append(date_obj)
+        except ValueError:
+            continue
+
+    if extracted_dates:
+        latest_date = max(extracted_dates).strftime('%Y-%m-%d')
+        return latest_date
     else:
-        return None
+        return "1900-01-01"
 
-# Apply the function to the DataFrame
-df['extracted_dates'] = df['sentences'].apply(extract_latest_date)
+merged_sentences = [
+    "Today is 11th of November, 2023, and tomorrow will be 12th of November, 2023",
+    "Agreement was signed on I March, 2017 and valid till March 5,2024",
+    "whenever Ram and Sita March 18, 2013 or April 20, 2014",
+    "Hanuman met Sita January 1, 2000, and again on February 2, 2002",
+    "dated as of October 27, 2000, and renewed on November 28, 2001",
+    "signed on October 2,2000 and again on December 3,2001",
+    "agreement titled of Sep 10,1983 and revised on Oct 11, 1984"
+]
 
-print(df)
+precise_latest_dates_corrected = [extract_latest_date_precise_corrected(sentence) for sentence in merged_sentences]
